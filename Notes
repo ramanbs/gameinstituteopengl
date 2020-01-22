@@ -1,0 +1,35 @@
+Steps for drawing triangle in OpenGL
+
+1. Create a buffer in GPU memory for the mesh
+2. Fill the buffer with mesh data (vertices) - vertex has some attributes, e.g. : position, color, texture coordinate etc
+3. Create shaders for knowing (GPU) how to draw your mesh
+4. Define vertex format for the mesh vertices 
+5. Draw the mesh
+   a) Set the shader as current.
+   b) Set the buffer as current
+   c) Draw the buffer
+
+
+Stages for pipeline : 
+
+Stage 							|					Input				| Output
+
+1. Vertex Shader (Programmable)			|		Raw Vertices (From CPU) | Transformed Vertices  
+2. Primitive Assembly & Rasterizer		|		Transformed Vertices	| Fragments
+3. Fragment Shader(Programmable)		| 		Fragments				| Processed Fragments
+4. Tests & Blending						| 		Processed Fragments		| Pixels
+
+
+Vertex Shader : Changes the 3d coordinates into a different 3d coordinate space
+Rasterization : takes primitive and coverts them into blocks of fragment for the fragment shader to assign color to them
+
+the triangle coordinates we are gonna draw is : (-0.5, -0.5), (0.5, -0.5), (0, 0.5) considering the 
+boundaries to be : (0, 1), (-1, 0), (1, 0) and (0, -1)
+center would be : (0, 0)
+z component - 0
+Coordinate Space used above is the one  given out by the vertex shader
+
+Vertex Buffer Object - OpenGL Object - generic place in memeory to hold data, so wen sedn the array of vertices to this buffer in GPU, so as to minimize the traffic of sending the data from CPU to GPU
+
+//GL_STATIC_DRAW - create once, setup once use it a lot, GL_DYNAMIC_DRAW - create once, change a lot and use it a lot, GL_STREAM_DRAW - create once, setup once and use once
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 

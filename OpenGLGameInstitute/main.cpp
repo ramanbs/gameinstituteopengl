@@ -6,25 +6,76 @@
 const char* APP_TITLE = "OPENGL WIndow";
 const int gWindowWidth = 800;
 const int gWindowHeight = 600;
-const bool gFullscreen = false;
+GLFWwindow* gWindow = NULL;
+bool gFullscreen = false;
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
 void showFPS(GLFWwindow* window);
+bool initOpenGL();
 
 int main() 
+{
+	if (!initOpenGL())
+	{
+		std::cerr << "OpenGL initialization failed" << std::endl;
+		return -1;
+	}
+
+	// clockwise
+	GLfloat vertices[] = {
+		0.0f, 0.5f, 0.0f,  //Top
+		0.5f, -0.5f, 0.0f, //Right
+	   -0.5f, -0.5f, 0.0f  //Left
+	};
+
+	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
+	//also this means we are running in retained mode rather than immediate mode
+	GLuint vbo, vao;
+	glGenBuffers(1, &vbo); // creates a buffer in GPU memory
+	glBindBuffer(GL_ARRAY_BUFFER, &vbo); //makes the vbo buffer as current buffer, only one buffer at a time
+	
+	//GL_STATIC_DRAW - create once, setup once use it a lot, GL_DYNAMIC_DRAW - create once, change a lot and use it a lot, GL_STREAM_DRAW - create once, setup once and use once
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	/*For core openGL we need to create VertexArrayObject - holds info for our buffer so that when we draw we need not refer buffer object but VAO instead. MOst meshes object holds a collections of one or more VBO which holds vertext point, vertex normal, texture coords. Older OpenGL needs to bind each data buffer and define memory layout every time you need to draw. VAO collects various info like pointer to VBO and only VAO can be binded and used before we draw something instead of providing everything every time we need to draw something (old way of doing it).  SImplifies and speeds rendering and is manadatory
+	*/
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao); // make it the current vao
+
+	// Create vertex attribute (always after we have bound the vao as these attrib works on the current vao) - for shaders to interpret the vertex data (how the vertex data is laid out in the buffer)
+	// 0 (index) - attribute identifier, 3 - number of components that constitute this attribute (x, y, z), GL_FLOAT - type of data, GL_FALSE - need to normalize the data in screen space,  0 - stride (continuous bytes of data that constitute the given attribute incase the vertext data is interleaved with some other data in the buffer like e.g. color), NULL - offset from which the actual data starts for this attrib in the buffer. 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexArrayAttrib(0); // 0 - attrib index
+
+
+	// Main Loop
+	while (!glfwWindowShouldClose(gWindow))
+	{
+		showFPS(gWindow);
+		glfwPollEvents(); 
+
+		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
+
+		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
+	}
+
+	glfwTerminate();
+	return 0;
+}
+
+bool initOpenGL()
 {
 	if (!glfwInit())
 	{
 		std::cerr << "GLFW initialization failed" << std::endl;
-		return -1;
+		return false;
 	}
 
 	//TODO: GLFW window hint - lookup documentation 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//for MAC - glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	GLFWwindow* pWindow = NULL;
+	//TODO: for MAC - glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	if (gFullscreen)
 	{
@@ -32,50 +83,39 @@ int main()
 		const GLFWvidmode* pVmode = glfwGetVideoMode(pMonitor);
 		if (pVmode != NULL)
 		{
-			pWindow = glfwCreateWindow(pVmode->width, pVmode->height, APP_TITLE, pMonitor, NULL);
+			gWindow = glfwCreateWindow(pVmode->width, pVmode->height, APP_TITLE, pMonitor, NULL);
 		}
 	}
 	else
 	{
-		pWindow = glfwCreateWindow(gWindowWidth, gWindowHeight, APP_TITLE, NULL, NULL);
+		gWindow = glfwCreateWindow(gWindowWidth, gWindowHeight, APP_TITLE, NULL, NULL);
 	}
-	
-	if (pWindow == NULL) 
+
+	if (gWindow == NULL)
 	{
 		std::cerr << "Failed to create a window" << std::endl;
 		glfwTerminate();
-		return -1;
+		return false;
 	}
 
-	glfwMakeContextCurrent(pWindow); // cant draw to the window withou this
+	glfwMakeContextCurrent(gWindow); // cant draw to the window withou this
 
-	glfwSetKeyCallback(pWindow, glfw_onKey);
+	glfwSetKeyCallback(gWindow, glfw_onKey);
 
 	glewExperimental = GL_TRUE; //TODO: might not initizlaize properly with this - check later
 
 	if (glewInit() != GLEW_OK)
 	{
 		std::cerr << "Failed to initialize GLEW" << std::endl;
-		return -1;
+		return false;
 	}
 
-	// Main Loop
-	while (!glfwWindowShouldClose(pWindow)) 
-	{
-		showFPS(pWindow);
-		glfwPollEvents(); 
+	glClearColor(0.23f, 0.38f, 0.47f, 1.0f);
 
-		glClearColor(0.23f, 0.38f, 0.47f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
-
-		glfwSwapBuffers(pWindow); // makes our application double buffered - front and back buffer
-	}
-
-	glfwTerminate();
-	return 0;
+	return true;
 }
 
-void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode) 
+void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -104,7 +144,7 @@ void showFPS(GLFWwindow* window)
 			<< APP_TITLE << "  "
 			<< "FPS : " << fps << "  "
 			<< "Frame Time : " << msPerFrame << " (ms)";
-		//TODO : why do ostringstream instead of string ?
+		//TODO : why use ostringstream instead of string ?
 
 		glfwSetWindowTitle(window, outs.str().c_str());
 

@@ -9,6 +9,22 @@ const int gWindowHeight = 600;
 GLFWwindow* gWindow = NULL;
 bool gFullscreen = false;
 
+const GLchar* vertexShaderSrc =
+"#version 330 core\n"
+"layout (location = 0) in vec3 pos;"  // layout of data coming into the shader, 0 - here is what we gave index to position attrib pointer
+"void main()"
+"{"
+"	gl_Position = vec4(pos.x, pos.y, pos.z, 1.0f);" // w - coordinate is set to 1, as its a flat triangle ina normalized device space
+"}";
+
+const GLchar * fragmentShaderSrc =
+"#version 330 core \n"
+"out vec4 frag_color;"
+"void main()"
+"{"
+"	frag_color = vec4(0.35f, 0.96f, 0.3f, 1.0f);"
+"}";
+
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
 void showFPS(GLFWwindow* window);
 bool initOpenGL();
@@ -32,20 +48,22 @@ int main()
 	//also this means we are running in retained mode rather than immediate mode
 	GLuint vbo, vao;
 	glGenBuffers(1, &vbo); // creates a buffer in GPU memory
-	glBindBuffer(GL_ARRAY_BUFFER, &vbo); //makes the vbo buffer as current buffer, only one buffer at a time
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); //makes the vbo buffer as current buffer, only one buffer at a time
 	
 	//GL_STATIC_DRAW - create once, setup once use it a lot, GL_DYNAMIC_DRAW - create once, change a lot and use it a lot, GL_STREAM_DRAW - create once, setup once and use once
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	/*For core openGL we need to create VertexArrayObject - holds info for our buffer so that when we draw we need not refer buffer object but VAO instead. MOst meshes object holds a collections of one or more VBO which holds vertext point, vertex normal, texture coords. Older OpenGL needs to bind each data buffer and define memory layout every time you need to draw. VAO collects various info like pointer to VBO and only VAO can be binded and used before we draw something instead of providing everything every time we need to draw something (old way of doing it).  SImplifies and speeds rendering and is manadatory
+	/*For core openGL we need to create VertexArrayObject - holds info for our buffer so that when we draw we need not refer buffer object but VAO instead. MOst meshes object holds a collections of one or more VBO which holds vertext point, vertex normal, texture coords. Older OpenGL needs to bind each data buffer and define memory layout every time you need to draw. VAO collects various info like pointer to VBO and only VAO can be binded and used before we draw something instead of providing everything every time we need to draw something (old way of doing it).  SImplifies and speeds rendering and is mandatory
 	*/
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao); // make it the current vao
 
 	// Create vertex attribute (always after we have bound the vao as these attrib works on the current vao) - for shaders to interpret the vertex data (how the vertex data is laid out in the buffer)
 	// 0 (index) - attribute identifier, 3 - number of components that constitute this attribute (x, y, z), GL_FLOAT - type of data, GL_FALSE - need to normalize the data in screen space,  0 - stride (continuous bytes of data that constitute the given attribute incase the vertext data is interleaved with some other data in the buffer like e.g. color), NULL - offset from which the actual data starts for this attrib in the buffer. 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexArrayAttrib(0); // 0 - attrib index
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
+	glEnableVertexAttribArray(0); // 0 - attrib index, by default opengl disables vertex attrib array.
+
+
 
 
 	// Main Loop
@@ -55,6 +73,11 @@ int main()
 		glfwPollEvents(); 
 
 		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
+
+		glBindVertexArray(vao); // bind to make vao active
+		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of components, in this case x,y,z 
+		glDrawArrays(GL_TRIANGLES, 0, 3); 
+		glBindVertexArray(0); // unbind the active vao
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
 	}

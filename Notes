@@ -20,7 +20,7 @@ Stage 							|					Input				| Output
 4. Tests & Blending						| 		Processed Fragments		| Pixels
 
 
-Vertex Shader : Changes the 3d coordinates into a different 3d coordinate space
+Vertex Shader : Changes the 3d coordinates into a different 3d coordinate space (normalized device coordinates)
 Rasterization : takes primitive and coverts them into blocks of fragment for the fragment shader to assign color to them
 
 the triangle coordinates we are gonna draw is : (-0.5, -0.5), (0.5, -0.5), (0, 0.5) considering the 
@@ -33,3 +33,15 @@ Vertex Buffer Object - OpenGL Object - generic place in memeory to hold data, so
 
 //GL_STATIC_DRAW - create once, setup once use it a lot, GL_DYNAMIC_DRAW - create once, change a lot and use it a lot, GL_STREAM_DRAW - create once, setup once and use once
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
+
+For core openGL we need to create VertexArrayObject - holds info for our buffer so that when we draw we need not refer buffer object but VAO instead. MOst meshes object holds a collections of one or more VBO which holds vertext point, vertex normal, texture coords. Older OpenGL needs to bind each data buffer and define memory layout every time you need to draw. VAO collects various info like pointer to VBO and only VAO can be binded and used before we draw something instead of providing everything every time we need to draw something (old way of doing it)
+
+Steps for creating shader : 
+
+1. Create vertex shader.
+2. Create fragment shader.
+3. Compile the shaders.
+4. Create a shader program.
+5. Attach the shaders to the program.
+6. Link the compiled shaders into a single Program.
+7. Use the program.

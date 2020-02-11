@@ -12,17 +12,21 @@ bool gFullscreen = false;
 const GLchar* vertexShaderSrc =
 "#version 330 core\n"
 "layout (location = 0) in vec3 pos;"  // layout of data coming into the shader, 0 - here is what we gave index to position attrib pointer
+"layout (location = 1) in vec3 color;"
+"out vec3 vert_color;"
 "void main()"
 "{"
 "	gl_Position = vec4(pos.x, pos.y, pos.z, 1.0f);" // w - coordinate is set to 1, as its a flat triangle ina normalized device space
+"	vert_color = color;"
 "}";
 
 const GLchar * fragmentShaderSrc =
 "#version 330 core \n"
+"in vec3 vert_color;"
 "out vec4 frag_color;"
 "void main()"
 "{"
-"	frag_color = vec4(0.35f, 0.96f, 0.3f, 1.0f);"
+"	frag_color = vec4(vert_color, 1.0f);"
 "}";
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
@@ -39,9 +43,10 @@ int main()
 
 	// clockwise
 	GLfloat vertices[] = {
-		0.0f, 0.5f, 0.0f,  //Top
-		0.5f, -0.5f, 0.0f, //Right
-	   -0.5f, -0.5f, 0.0f  //Left
+		//position		   //color
+		0.0f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  //Top
+		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  //Right
+	   -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  //Left
 	};
 
 	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
@@ -60,11 +65,57 @@ int main()
 
 	// Create vertex attribute (always after we have bound the vao as these attrib works on the current vao) - for shaders to interpret the vertex data (how the vertex data is laid out in the buffer)
 	// 0 (index) - attribute identifier, 3 - number of components that constitute this attribute (x, y, z), GL_FLOAT - type of data, GL_FALSE - need to normalize the data in screen space,  0 - stride (continuous bytes of data that constitute the given attribute incase the vertext data is interleaved with some other data in the buffer like e.g. color), NULL - offset from which the actual data starts for this attrib in the buffer. 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
+	//position attrib pointer
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
 	glEnableVertexAttribArray(0); // 0 - attrib index, by default opengl disables vertex attrib array.
 
+	// color attrib pointer
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (GLvoid*)(sizeof(GLfloat) * 3));
+	glEnableVertexAttribArray(1);
 
+	// Create vertex shader and fragment shader
 
+	GLuint vs = glCreateShader(GL_VERTEX_SHADER); // returns id of the created shader
+	glShaderSource(vs, 1, &vertexShaderSrc, NULL); // link the shader object to the shader string, 1 - no of shader strings, NULL - length of the shader string
+	glCompileShader(vs);
+
+	GLint result; // stores 
+	GLchar infoLog[512];
+	glGetShaderiv(vs, GL_COMPILE_STATUS, &result); //GL_COMPILE_STATUS - pname ( more available ) , &result  - stores the result of compile status in this variable
+
+	if (!result) 
+	{
+		glGetShaderInfoLog(vs, sizeof(infoLog), NULL, infoLog); // why infoLog and not &infoLog, NULL - returns the length of the info log returned
+		std::cout << "Error! Vertex Shader compilation failed" << infoLog << std::endl;
+	}
+
+	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fs, 1, &fragmentShaderSrc,  NULL);
+	glCompileShader(fs);
+
+	glGetShaderiv(fs, GL_COMPILE_STATUS, &result);
+
+	if (!result) 
+	{
+		glGetShaderInfoLog(fs, sizeof(infoLog), NULL, infoLog);
+		std::cout << "Error! Fragment Shader compilation failed" << infoLog << std::endl;
+	}
+
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vs);
+	glAttachShader(shaderProgram, fs);
+	glLinkProgram(shaderProgram);
+
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &result);
+
+	if (!result)
+	{
+		glGetProgramInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
+		std::cout << "Error! Shader Program Linker failed" << infoLog << std::endl;
+	}
+
+	glDeleteShader(vs);
+	glDeleteShader(fs);
 
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
@@ -73,6 +124,7 @@ int main()
 		glfwPollEvents(); 
 
 		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
+		glUseProgram(shaderProgram); // should be used before draw arrays
 
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of components, in this case x,y,z 
@@ -81,6 +133,11 @@ int main()
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
 	}
+
+	//Cleanup
+	glDeleteProgram(shaderProgram);
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
 
 	glfwTerminate();
 	return 0;

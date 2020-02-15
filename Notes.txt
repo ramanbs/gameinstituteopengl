@@ -45,3 +45,8 @@ Steps for creating shader :
 5. Attach the shaders to the program.
 6. Link the compiled shaders into a single Program.
 7. Use the program.
+
+Indexed Buffer vs Normal Vertex Buffer : 
+
+1. Index Buffer provides the index of the vertex to be drawn ( just like in Unity we provide vertices array and an index array)
+2. Index Buffer prevents re-draw of vertices.

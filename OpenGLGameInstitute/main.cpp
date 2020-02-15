@@ -8,25 +8,22 @@ const int gWindowWidth = 800;
 const int gWindowHeight = 600;
 GLFWwindow* gWindow = NULL;
 bool gFullscreen = false;
+bool gWireframe = false;
 
 const GLchar* vertexShaderSrc =
 "#version 330 core\n"
-"layout (location = 0) in vec3 pos;"  // layout of data coming into the shader, 0 - here is what we gave index to position attrib pointer
-"layout (location = 1) in vec3 color;"
-"out vec3 vert_color;"
+"layout (location = 0) in vec3 pos;"  // layout of data coming into the shader, 0 - here is what we gave index to position attrib pointer"
 "void main()"
 "{"
 "	gl_Position = vec4(pos.x, pos.y, pos.z, 1.0f);" // w - coordinate is set to 1, as its a flat triangle ina normalized device space
-"	vert_color = color;"
 "}";
 
 const GLchar * fragmentShaderSrc =
 "#version 330 core \n"
-"in vec3 vert_color;"
 "out vec4 frag_color;"
 "void main()"
 "{"
-"	frag_color = vec4(vert_color, 1.0f);"
+"	frag_color = vec4(0.35f, 0.96f, 0.3f, 1.0f);"
 "}";
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
@@ -43,10 +40,14 @@ int main()
 
 	// clockwise
 	GLfloat vertices[] = {
-		//position		   //color
-		0.0f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  //Top
-		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  //Right
-	   -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  //Left
+		//triangle 0
+	   -0.5f,  0.5f, 0.0f,
+		0.5f,  0.5f, 0.0f,
+	    0.5f, -0.5f, 0.0f,
+		//triangle 1
+	   -0.5f,  0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+	   -0.5f, -0.5f, 0.0f,
 	};
 
 	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
@@ -66,12 +67,9 @@ int main()
 	// Create vertex attribute (always after we have bound the vao as these attrib works on the current vao) - for shaders to interpret the vertex data (how the vertex data is laid out in the buffer)
 	// 0 (index) - attribute identifier, 3 - number of components that constitute this attribute (x, y, z), GL_FLOAT - type of data, GL_FALSE - need to normalize the data in screen space,  0 - stride (continuous bytes of data that constitute the given attribute incase the vertext data is interleaved with some other data in the buffer like e.g. color), NULL - offset from which the actual data starts for this attrib in the buffer. 
 	//position attrib pointer
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
 	glEnableVertexAttribArray(0); // 0 - attrib index, by default opengl disables vertex attrib array.
 
-	// color attrib pointer
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (GLvoid*)(sizeof(GLfloat) * 3));
-	glEnableVertexAttribArray(1);
 
 	// Create vertex shader and fragment shader
 
@@ -127,8 +125,8 @@ int main()
 		glUseProgram(shaderProgram); // should be used before draw arrays
 
 		glBindVertexArray(vao); // bind to make vao active
-		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of components, in this case x,y,z 
-		glDrawArrays(GL_TRIANGLES, 0, 3); 
+		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 
+		glDrawArrays(GL_TRIANGLES, 0, 6); 
 		glBindVertexArray(0); // unbind the active vao
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
@@ -199,6 +197,17 @@ void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+	{
+		gWireframe = !gWireframe;
+
+		//GL_FRONT_AND_BACK - winding order of vertices
+		if (gWireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 void showFPS(GLFWwindow* window)

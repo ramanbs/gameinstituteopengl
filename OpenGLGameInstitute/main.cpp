@@ -40,19 +40,21 @@ int main()
 
 	// clockwise
 	GLfloat vertices[] = {
-		//triangle 0
+		// indexed buffer
 	   -0.5f,  0.5f, 0.0f,
 		0.5f,  0.5f, 0.0f,
 	    0.5f, -0.5f, 0.0f,
-		//triangle 1
-	   -0.5f,  0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
 	   -0.5f, -0.5f, 0.0f,
+	};
+
+	GLuint indices[] = {
+		0, 1, 2, // tri 0
+		0, 2, 3 // tri 1
 	};
 
 	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
 	//also this means we are running in retained mode rather than immediate mode
-	GLuint vbo, vao;
+	GLuint vbo, ibo, vao;
 	glGenBuffers(1, &vbo); // creates a buffer in GPU memory
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); //makes the vbo buffer as current buffer, only one buffer at a time
 	
@@ -69,6 +71,11 @@ int main()
 	//position attrib pointer
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
 	glEnableVertexAttribArray(0); // 0 - attrib index, by default opengl disables vertex attrib array.
+
+	// Creating index buffer
+	glGenBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
 	// Create vertex shader and fragment shader
@@ -126,7 +133,8 @@ int main()
 
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 
-		glDrawArrays(GL_TRIANGLES, 0, 6); 
+		//glDrawArrays(GL_TRIANGLES, 0, 6);  - this now we dont use as we are using indexed buffer
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // primitive, number of vertices, type of indices buffer, offset from which to read the indices
 		glBindVertexArray(0); // unbind the active vao
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
@@ -136,6 +144,7 @@ int main()
 	glDeleteProgram(shaderProgram);
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ibo);
 
 	glfwTerminate();
 	return 0;

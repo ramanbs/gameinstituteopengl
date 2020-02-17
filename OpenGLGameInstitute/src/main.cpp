@@ -3,7 +3,7 @@
 #include "GL/glew.h" // Always before GLFW, creates function pointer to all the openGl function supported for our graphics card driver at runtime
 #include "GLFW/glfw3.h"
 
-const char* APP_TITLE = "OPENGL WIndow";
+const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
 const int gWindowWidth = 800;
 const int gWindowHeight = 600;
 GLFWwindow* gWindow = NULL;
@@ -77,51 +77,6 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-
-	// Create vertex shader and fragment shader
-
-	GLuint vs = glCreateShader(GL_VERTEX_SHADER); // returns id of the created shader
-	glShaderSource(vs, 1, &vertexShaderSrc, NULL); // link the shader object to the shader string, 1 - no of shader strings, NULL - length of the shader string
-	glCompileShader(vs);
-
-	GLint result; // stores 
-	GLchar infoLog[512];
-	glGetShaderiv(vs, GL_COMPILE_STATUS, &result); //GL_COMPILE_STATUS - pname ( more available ) , &result  - stores the result of compile status in this variable
-
-	if (!result) 
-	{
-		glGetShaderInfoLog(vs, sizeof(infoLog), NULL, infoLog); // why infoLog and not &infoLog, NULL - returns the length of the info log returned
-		std::cout << "Error! Vertex Shader compilation failed" << infoLog << std::endl;
-	}
-
-	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fs, 1, &fragmentShaderSrc,  NULL);
-	glCompileShader(fs);
-
-	glGetShaderiv(fs, GL_COMPILE_STATUS, &result);
-
-	if (!result) 
-	{
-		glGetShaderInfoLog(fs, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Error! Fragment Shader compilation failed" << infoLog << std::endl;
-	}
-
-	GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vs);
-	glAttachShader(shaderProgram, fs);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &result);
-
-	if (!result)
-	{
-		glGetProgramInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Error! Shader Program Linker failed" << infoLog << std::endl;
-	}
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
 	{
@@ -141,7 +96,6 @@ int main()
 	}
 
 	//Cleanup
-	glDeleteProgram(shaderProgram);
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
 	glDeleteBuffers(1, &ibo);

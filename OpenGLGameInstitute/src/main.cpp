@@ -3,28 +3,14 @@
 #include "GL/glew.h" // Always before GLFW, creates function pointer to all the openGl function supported for our graphics card driver at runtime
 #include "GLFW/glfw3.h"
 
+#include "ShaderProgram.h"
+
 const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
 const int gWindowWidth = 800;
 const int gWindowHeight = 600;
 GLFWwindow* gWindow = NULL;
 bool gFullscreen = false;
 bool gWireframe = false;
-
-const GLchar* vertexShaderSrc =
-"#version 330 core\n"
-"layout (location = 0) in vec3 pos;"  // layout of data coming into the shader, 0 - here is what we gave index to position attrib pointer"
-"void main()"
-"{"
-"	gl_Position = vec4(pos.x, pos.y, pos.z, 1.0f);" // w - coordinate is set to 1, as its a flat triangle ina normalized device space
-"}";
-
-const GLchar * fragmentShaderSrc =
-"#version 330 core \n"
-"out vec4 frag_color;"
-"void main()"
-"{"
-"	frag_color = vec4(0.35f, 0.96f, 0.3f, 1.0f);"
-"}";
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
 void showFPS(GLFWwindow* window);
@@ -77,6 +63,9 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+	ShaderProgram shaderProgram;
+	shaderProgram.loadShaders("shaders/basic.vert", "shaders/basic.frag");
+
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
 	{
@@ -84,7 +73,7 @@ int main()
 		glfwPollEvents(); 
 
 		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
-		glUseProgram(shaderProgram); // should be used before draw arrays
+		shaderProgram.use();// should be used before draw arrays
 
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 

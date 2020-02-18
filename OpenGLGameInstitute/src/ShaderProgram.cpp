@@ -27,45 +27,26 @@ bool ShaderProgram::loadShaders(const char* vsFilename, const char* fsFilename)
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 
 	glShaderSource(vs, 1, &vsSourcePtr, NULL); // link the shader object to the shader string, 1 - no of shader strings, NULL - length of the shader string
+	glShaderSource(fs, 1, &fsSourcePtr, NULL);
+
 	glCompileShader(vs);
 
-	GLint result; // stores 
-	GLchar infoLog[512];
-	glGetShaderiv(vs, GL_COMPILE_STATUS, &result); //GL_COMPILE_STATUS - pname ( more available ) , &result  - stores the result of compile status in this variable
+	checkCompilerErrors(vs, VERTEX);
 
-	if (!result)
-	{
-		glGetShaderInfoLog(vs, sizeof(infoLog), NULL, infoLog); // why infoLog and not &infoLog, NULL - returns the length of the info log returned
-		std::cout << "Error! Vertex Shader compilation failed" << infoLog << std::endl;
-	}
-
-	
-	glShaderSource(fs, 1, &fragmentShaderSrc, NULL);
 	glCompileShader(fs);
 
-	glGetShaderiv(fs, GL_COMPILE_STATUS, &result);
+	checkCompilerErrors(fs, FRAGMENT);
 
-	if (!result)
-	{
-		glGetShaderInfoLog(fs, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Error! Fragment Shader compilation failed" << infoLog << std::endl;
-	}
+	mHandle = glCreateProgram();
+	glAttachShader(mHandle, vs);
+	glAttachShader(mHandle, fs);
+	glLinkProgram(mHandle);
 
-	GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vs);
-	glAttachShader(shaderProgram, fs);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &result);
-
-	if (!result)
-	{
-		glGetProgramInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Error! Shader Program Linker failed" << infoLog << std::endl;
-	}
+	checkCompilerErrors(mHandle, PROGRAM); // not needed to send mHandle, have to find a better way
 
 	glDeleteShader(vs);
 	glDeleteShader(fs);
+
 	return true;
 }
 
@@ -83,7 +64,7 @@ string ShaderProgram::fileToString(const string& fileName)
 	try 
 	{
 		//TODO: readup files in http://www.cplusplus.com/doc/tutorial/files/
-		file.open(filename, std::ios::in);
+		file.open(fileName, std::ios::in);
 
 		if (!file.fail()) 
 		{
@@ -103,5 +84,36 @@ string ShaderProgram::fileToString(const string& fileName)
 
 void ShaderProgram::checkCompilerErrors(GLuint shader, ShaderType type) 
 {
+	int status = 0;
+
+	if (type == PROGRAM)
+	{
+		glGetProgramiv(mHandle, GL_LINK_STATUS, &status);
+		
+		if (status == GL_FALSE)
+		{
+			GLint length = 0;
+			glGetProgramiv(mHandle, GL_INFO_LOG_LENGTH, &length);
+
+			string errorLog(length, ' ');
+			glGetProgramInfoLog(mHandle, length, NULL, &errorLog[0]);
+			std::cerr << "Error! Program failed to link" << errorLog << std::endl;
+		}
+	}
+	else // VERTEX or FRAGMENT 
+	{
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+		
+		if (status == GL_FALSE) 
+		{
+			GLint length = 0;
+			glGetShaderiv(mHandle, GL_INFO_LOG_LENGTH, &length);
+
+			string errorLog(length, ' ');
+			//TODO: check NULL as *length vs &length implementation
+			glGetShaderInfoLog(shader, length, NULL, &errorLog[0]);
+			std::cerr << "Error! Shader Compilation failed." << errorLog << std::endl;
+		}
+	}
 
 }

@@ -50,3 +50,24 @@ Indexed Buffer vs Normal Vertex Buffer :
 
 1. Index Buffer provides the index of the vertex to be drawn ( just like in Unity we provide vertices array and an index array)
 2. Index Buffer prevents re-draw of vertices.
+
+GLSL Shader Data types
+
+Scalar : 
+float, double, int, uint and bool
+
+Vectors : 
+vec2, vec3, vec4
+ivec2, ivec3, .. for all scalar corresponding types
+
+Square Matrices: 
+
+mat2, mat3, mat4,
+dmat2, dmat3, dmat4
+
+Non Square matrices : 
+mat{2x3, 4}x{2,3,4}
+dmat{2x3, 4}x{2,3,4}
+
+Uniform variables are available to the shaders through the CPU and they are global to all the shaders in the program. 
+Value of uniform remains constant for a draw call, unline vertex and fragment where they change for each vertext or fragment.

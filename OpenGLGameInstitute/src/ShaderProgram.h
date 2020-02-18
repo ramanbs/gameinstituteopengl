@@ -3,6 +3,8 @@
 
 #include "GL/glew.h"
 #include <string>
+#include <map>
+#include "glm/glm.hpp"
 
 using std::string;
 
@@ -22,12 +24,18 @@ public:
 	bool loadShaders(const char* vsFilename, const char* fsFilename);
 	void use();
 
+	void setUniform(const GLchar* name, const glm::vec2& v);
+	void setUniform(const GLchar* name, const glm::vec3& v);
+	void setUniform(const GLchar* name, const glm::vec4& v);
+
 private:
 
 	string fileToString(const string& fileName); //TODO: Read std strings in detail
 	void checkCompilerErrors(GLuint shader, ShaderType type);
+	GLint getUniformLocation(const GLchar* name);
 
 	GLuint mHandle;
+	std::map<string, GLint> mUniformLocations;
 };
 
 #endif //SHADER_PROGRAM_H

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include "glm/glm.hpp"
 #include "GL/glew.h" // Always before GLFW, creates function pointer to all the openGl function supported for our graphics card driver at runtime
 #include "GLFW/glfw3.h"
 
@@ -74,6 +75,22 @@ int main()
 
 		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
 		shaderProgram.use();// should be used before draw arrays
+
+		// the uniforms should always be set after the program is in use, because setUniforms will set it for the currently active shader program
+		GLfloat time = glfwGetTime();
+		
+		glm::vec4 color; //TODO::make it rainbow transition
+		color.x = (sin(time) / 2);
+		color.y = ((color.x + sin(time/2)) / 2);
+		color.z = ((color.y  + sin(time/4)) / 2);
+		color.w = 1.0f;
+		
+		glm::vec2 pos;
+		pos.x = sin(time) / 2; // considering normalized rectangle vector positions, the sin oscillates b/w -1 and 1 so its would move out of window space
+		pos.y = cos(time) / 2;
+
+		shaderProgram.setUniform("posOffset", pos);
+		shaderProgram.setUniform("vertColor", color);
 
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 

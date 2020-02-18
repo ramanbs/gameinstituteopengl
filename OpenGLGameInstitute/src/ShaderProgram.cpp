@@ -47,6 +47,8 @@ bool ShaderProgram::loadShaders(const char* vsFilename, const char* fsFilename)
 	glDeleteShader(vs);
 	glDeleteShader(fs);
 
+	mUniformLocations.clear();
+	
 	return true;
 }
 
@@ -116,4 +118,34 @@ void ShaderProgram::checkCompilerErrors(GLuint shader, ShaderType type)
 		}
 	}
 
+}
+
+GLint ShaderProgram::getUniformLocation(const GLchar* name)
+{
+	std::map<string, GLint>::iterator it = mUniformLocations.find(name);
+
+	if (it == mUniformLocations.end())
+	{
+		mUniformLocations[name] = glGetUniformLocation(mHandle, name);
+	}
+
+	return mUniformLocations[name];
+}
+
+void ShaderProgram::setUniform(const GLchar* name, const glm::vec2& v) 
+{
+	GLint loc = getUniformLocation(name);
+	glUniform2f(loc, v.x, v.y); // sets 2 floating point elements basically a floating vec2
+}
+
+void ShaderProgram::setUniform(const GLchar* name, const glm::vec3& v)
+{
+	GLint loc = getUniformLocation(name);
+	glUniform3f(loc, v.x, v.y, v.z); // opengl follows rules of 'c' language and hence no overloads for glUniform available
+}
+
+void ShaderProgram::setUniform(const GLchar* name, const glm::vec4& v) 
+{
+	GLint loc = getUniformLocation(name);
+	glUniform4f(loc, v.x, v.y, v.z, v.w);
 }

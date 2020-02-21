@@ -149,7 +149,7 @@ bool initOpenGL()
 
 	glfwSetKeyCallback(gWindow, glfw_onKey);
 
-	glewExperimental = GL_TRUE; //TODO: might not initizlaize properly with this - check later
+	glewExperimental = GL_TRUE; //TODO: might not initialize properly without this - check later
 
 	if (glewInit() != GLEW_OK)
 	{

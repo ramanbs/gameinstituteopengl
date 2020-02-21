@@ -71,3 +71,31 @@ dmat{2x3, 4}x{2,3,4}
 
 Uniform variables are available to the shaders through the CPU and they are global to all the shaders in the program. 
 Value of uniform remains constant for a draw call, unline vertex and fragment where they change for each vertext or fragment.
+
+For textures we need to load images into our application not supported directly by opengl. We are using a third party lib called "stb" by "nothings/stb" in github.
+We need only stb_image.h out of this lib.
+ There are other libs called soil, image magic, freeimage
+ 
+Image coordinate system is different from normalized opengl coordinate system.
+
+The origin (0,0) for image coordinate is in top left corner whereas in opengl it is bottom left corner.
+
+Pixels are to image what texels are to texture in opengl. Since texels are pixels normalized in opengl coordinate space between 0 and 1 .
+
+Texture wrapping mode decides what happens when texture u,v coordinates are outside the (0,0) to (1,1) range.
+Wrapping modes available : 
+
+1. GL_REPEAT (default)
+So fragment shader is sampling the texture and it finds u,v more than 1 then it sets back to initial value of texture coordinate and starts from beginning again
+2. GL_MIRRORED_REPEAT
+Similar to GL_REPEAT but starts from end after sampling once 
+
+3. GL_CLAMP_TO_EDGE
+After sampling the texture once it will repeat the last color in both row and column.
+
+4. GL_CLAMP_TO_BORDER
+Similar to clamp to edge but, repeats the color we specify at the end of sampling the texture. Default color is black.
+
+Texture filtering : 
+If the area where we map the texture to is same as the texture size, then we would not need filtering but thats such a rare case.
+

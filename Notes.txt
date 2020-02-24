@@ -99,3 +99,25 @@ Similar to clamp to edge but, repeats the color we specify at the end of samplin
 Texture filtering : 
 If the area where we map the texture to is same as the texture size, then we would not need filtering but thats such a rare case.
 
+2 Mappings : 1. Magnification 2. Minification
+
+GL_NEAREST : Nearest neighbor filtering. In this for the current texel being sampled, the texel closest to the fragment that is sampling the texel will be returned. (jagged and pixelated)
+
+
+GL_LINEAR or billinear : In this the wieghted average color of the neighboring texels (2- in 1D, 4 in 2D and 8 in 3D) is returned (neighbors of the current texel being sampled) to the fragment that is sampling the texel. 
+GL_LINEAR or billinear : In this the wieghted average color of the neighboring texels is returned (neighbors of the current texel being sampled) to the fragment that is sampling the texel.  (smoothed out)
+
+
+MipMaps :
+Multiple images within texture file, each 1/4 the size of the previous image, might go upto size of a pixel. This gives a boost in performance in terms of LOD. So when this  texture is shown mapped to an object far away, it doesnt have to rendering the full blown high resolution image instead it will use one of the lower resolution one depending on required LOD.  
+
+In fragment shaders, the texture sampler are there in built provided by GLSL. There are many types and we have to find about them. The one that is used in case of importing airplane.png is sampler2D.
+
+So when the texture loaded, it loaded flipped. There are ways to rectify this :
+
+1. by image loader itself but stb image laoder might not do this for use
+2. by flipping the y coordinate in shader 
+3. way taught in tutorial
+
+ 
+

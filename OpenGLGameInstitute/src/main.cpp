@@ -5,6 +5,7 @@
 #include "GLFW/glfw3.h"
 
 #include "ShaderProgram.h"
+#include "Texture2D.h"
 
 const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
 const int gWindowWidth = 800;
@@ -12,6 +13,7 @@ const int gWindowHeight = 600;
 GLFWwindow* gWindow = NULL;
 bool gFullscreen = false;
 bool gWireframe = false;
+const std::string texture1 = "textures/airplane.png";
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
 void showFPS(GLFWwindow* window);
@@ -27,11 +29,11 @@ int main()
 
 	// clockwise
 	GLfloat vertices[] = {
-		// indexed buffer
-	   -0.5f,  0.5f, 0.0f,
-		0.5f,  0.5f, 0.0f,
-	    0.5f, -0.5f, 0.0f,
-	   -0.5f, -0.5f, 0.0f,
+		// position			// tex coordinates
+	   -0.5f,  0.5f, 0.0f,  0.0f, 1.0f, // top left
+		0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right 
+	    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
+	   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left (0,0) for u,v coordinates
 	};
 
 	GLuint indices[] = {
@@ -56,9 +58,13 @@ int main()
 	// Create vertex attribute (always after we have bound the vao as these attrib works on the current vao) - for shaders to interpret the vertex data (how the vertex data is laid out in the buffer)
 	// 0 (index) - attribute identifier, 3 - number of components that constitute this attribute (x, y, z), GL_FLOAT - type of data, GL_FALSE - need to normalize the data in screen space,  0 - stride (continuous bytes of data that constitute the given attribute incase the vertext data is interleaved with some other data in the buffer like e.g. color), NULL - offset from which the actual data starts for this attrib in the buffer. 
 	//position attrib pointer
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, NULL); // holds info passed to this function in the VAO, so we have to generate VAO first.
 	glEnableVertexAttribArray(0); // 0 - attrib index, by default opengl disables vertex attrib array.
 
+	//texture attrib
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, (GLvoid*)((sizeof(GLfloat) * 3)));
+	glEnableVertexAttribArray(1);
+	
 	// Creating index buffer
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -67,6 +73,9 @@ int main()
 	ShaderProgram shaderProgram;
 	shaderProgram.loadShaders("shaders/basic.vert", "shaders/basic.frag");
 
+	Texture2D texture;
+	texture.loadTexture(texture1, true);
+
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
 	{
@@ -74,24 +83,11 @@ int main()
 		glfwPollEvents(); 
 
 		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
+
+		texture.bind();
+
 		shaderProgram.use();// should be used before draw arrays
-
-		// the uniforms should always be set after the program is in use, because setUniforms will set it for the currently active shader program
-		GLfloat time = glfwGetTime();
 		
-		glm::vec4 color; //TODO::make it rainbow transition
-		color.x = (sin(time) / 2);
-		color.y = ((color.x + sin(time/2)) / 2);
-		color.z = ((color.y  + sin(time/4)) / 2);
-		color.w = 1.0f;
-		
-		glm::vec2 pos;
-		pos.x = sin(time) / 2; // considering normalized rectangle vector positions, the sin oscillates b/w -1 and 1 so its would move out of window space
-		pos.y = cos(time) / 2;
-
-		shaderProgram.setUniform("posOffset", pos);
-		shaderProgram.setUniform("vertColor", color);
-
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 
 		//glDrawArrays(GL_TRIANGLES, 0, 6);  - this now we dont use as we are using indexed buffer

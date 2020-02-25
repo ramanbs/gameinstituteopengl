@@ -78,5 +78,6 @@ bool Texture2D::loadTexture(const string& fileName, bool generateMipMaps)
 
 void Texture2D::bind(GLuint texUnit) 
 {
+	glActiveTexture(GL_TEXTURE0 + texUnit); // activate the texture unit 0, so that when we bind the texture next, it gets attached to this texture unit. We can have upto 16 texture units at the sam time available for shader to be blended.//TODO : api to query how many tex units available fo rour graphics card 
 	glBindTexture(GL_TEXTURE_2D, mTexture);
 }

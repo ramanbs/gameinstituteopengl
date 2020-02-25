@@ -28,6 +28,8 @@ public:
 	void setUniform(const GLchar* name, const glm::vec3& v);
 	void setUniform(const GLchar* name, const glm::vec4& v);
 
+	GLuint getProgram() const;
+
 private:
 
 	string fileToString(const string& fileName); //TODO: Read std strings in detail

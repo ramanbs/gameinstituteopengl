@@ -13,7 +13,8 @@ const int gWindowHeight = 600;
 GLFWwindow* gWindow = NULL;
 bool gFullscreen = false;
 bool gWireframe = false;
-const std::string texture1 = "textures/airplane.png";
+const std::string texture1FileName = "textures/airplane.png";
+const std::string texture2FileName = "textures/crate.jpg";
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
 void showFPS(GLFWwindow* window);
@@ -73,8 +74,11 @@ int main()
 	ShaderProgram shaderProgram;
 	shaderProgram.loadShaders("shaders/basic.vert", "shaders/basic.frag");
 
-	Texture2D texture;
-	texture.loadTexture(texture1, true);
+	Texture2D texture1;
+	texture1.loadTexture(texture1FileName, true);
+
+	Texture2D texture2;
+	texture2.loadTexture(texture2FileName, true);
 
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
@@ -84,9 +88,15 @@ int main()
 
 		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
 
-		texture.bind();
-
+		texture1.bind(0); //TODO 0 - Texture unit that is used in shader by sampler, gives a location of the texture units. Shader can refrence multiple textures using this texture unit. You can have only one texture active (bound) at a time but can reference multiple texture units. Need to know more about this for more clarity, multiple tex units vs multiple texture.
+		texture2.bind(1);
+		
 		shaderProgram.use();// should be used before draw arrays
+
+		//set the locations of sampler in case of multiple texturing, have to be set after using the program. IT has to be active.
+		glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture1"), 0);
+		//TODO - compare with shader program implementation, and & remove accessor to program
+		glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture2"), 1);
 		
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 

@@ -119,5 +119,8 @@ So when the texture loaded, it loaded flipped. There are ways to rectify this :
 2. by flipping the y coordinate in shader 
 3. way taught in tutorial
 
+Multi-texturing :
+Lay multiple textures on the same area. Like normal, diffuse and other maps on the same area. 
+
  
 

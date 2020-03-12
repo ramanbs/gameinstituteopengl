@@ -109,6 +109,7 @@ GL_LINEAR or billinear : In this the wieghted average color of the neighboring t
 
 
 MipMaps :
+
 Multiple images within texture file, each 1/4 the size of the previous image, might go upto size of a pixel. This gives a boost in performance in terms of LOD. So when this  texture is shown mapped to an object far away, it doesnt have to rendering the full blown high resolution image instead it will use one of the lower resolution one depending on required LOD.  
 
 In fragment shaders, the texture sampler are there in built provided by GLSL. There are many types and we have to find about them. The one that is used in case of importing airplane.png is sampler2D.
@@ -121,6 +122,48 @@ So when the texture loaded, it loaded flipped. There are ways to rectify this :
 
 Multi-texturing :
 Lay multiple textures on the same area. Like normal, diffuse and other maps on the same area. 
+
+Coordinate Systems : 
+
+Upto now we have been drawing in normalized device coordinate system.
+
+There are 5 coordinate systems in OpenGL: 
+
+1. Object Space(Local) : This is basically a 3-d objects coordinate space, in which it was made, wherein there is an origin specified within the model and serves as a point of reference or relative for rest of vertices.
+
+2. World Space : This is the space our model will live in. Hence the position of model in the world is relative to this. 
+
+3. Camera coordinate system (View Space) : Camera Space, so everything in teh world is relative to camera position as if camera is origin
+In 3d graphics, camera never moves, everything else moves in respect to the camera, since the view is like that.
+
+Right vs Left Coordinate System. 
+OPengl is Right Handed and DirectX is left handed. In right handed the z-axis ponts towards the camera whereas in left it is away from the camera.
+
+Matrix Multiplication Order : 
+Suppose if we want to translate our model in 3d space by (0,15,-15) and then rotate by 90 degrees.
+
+M = T * R (Matrix Multiplication Order - righ to left) - so this will rotate this model by 90 degrees and then translate it to position. 
+
+4. Clip Space : From the view Space we create the projection matrix to generate our clip space. Takes in the 3d coordiantes and projects into the 2d space. Two Types : 
+
+1. Orthogographics : Every vertex  is directly mapped to clip space, has same depth for very vertex. The view frustrum for an orthigraphic projection is a cube.
+
+2. Perspective : Gives depth Things away from camera gets smaller. View frustrum is a pyramid with top cut off.
+
+Multiply one of these projection matrices and we get our model in clip space.
+
+
+
+Pipeline of Coordinate Space Transformation : 
+
+1.Local Space ---Model Matrix---> 2. World Space ---View Matrix---> 3. View Space ---Projection Matrix ---> 4. Clip Space ---Perspective divided by W---> 5. Normalized Device Space ---Viewport Transform---> Viewport or Screen Space
+
+Transforming a Vertex across all these coordinate spaces mathematically : 
+
+Vertex in Clip Space[4X1] = Projection Matrix[4X4] X View Space [4X4] X World Space[4X4] X Model Space [4X4] X Vertex in Local Space [4X1]  
+<--------------------------------------------- Order Of Multiply for Column Major Matrices
+
+
 
  
 

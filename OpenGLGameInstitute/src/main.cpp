@@ -8,15 +8,20 @@
 #include "Texture2D.h"
 
 const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
-const int gWindowWidth = 800;
-const int gWindowHeight = 600;
-GLFWwindow* gWindow = NULL;
-bool gFullscreen = false;
-bool gWireframe = false;
 const std::string texture1FileName = "textures/airplane.png";
 const std::string texture2FileName = "textures/crate.jpg";
 
+GLFWwindow* gWindow = NULL;
+
+int gWindowWidth = 1024;
+int gWindowHeight = 768;
+
+bool gFullscreen = false;
+bool gWireframe = false;
+
+
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
+void glfw_OnFrameBufferSize(GLFWwindow* window, int width, int height);
 void showFPS(GLFWwindow* window);
 bool initOpenGL();
 
@@ -28,14 +33,14 @@ int main()
 		return -1;
 	}
 
-	// clockwise
-	GLfloat vertices[] = {
-		// position			// tex coordinates
-	   -0.5f,  0.5f, 0.0f,  0.0f, 1.0f, // top left
-		0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right 
-	    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
-	   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left (0,0) for u,v coordinates
-	};
+	//// clockwise
+	//GLfloat vertices[] = {
+	//	// position			// tex coordinates
+	//   -0.5f,  0.5f, 0.0f,  0.0f, 1.0f, // top left
+	//	0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right 
+	//    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
+	//   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left (0,0) for u,v coordinates
+	//};
 
 	GLuint indices[] = {
 		0, 1, 2, // tri 0
@@ -164,6 +169,8 @@ bool initOpenGL()
 	}
 
 	glClearColor(0.23f, 0.38f, 0.47f, 1.0f);
+	// resize viewport whenever window is resized
+	glViewport(0, 0, gWindowWidth, gWindowHeight);
 
 	return true;
 }
@@ -183,6 +190,17 @@ void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode)
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+}
+
+void glfw_OnFrameBufferSize(GLFWwindow* window, int width, int height) 
+{
+	gWindowWidth = width;
+	gWindowHeight = height;
+
+	// Converts from OpenGl 2D coordinates to Screen Coordinates
+	// OPenGL Coordinates x varies -1 to 1 and y varies -1 to 1
+	// Screen Coordinates starts from lower left corner - (0,0) to (width, height)
+	glViewport(0, 0, gWindowWidth, gWindowHeight);
 }
 
 void showFPS(GLFWwindow* window)

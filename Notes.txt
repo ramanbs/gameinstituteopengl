@@ -164,6 +164,26 @@ Vertex in Clip Space[4X1] = Projection Matrix[4X4] X View Space [4X4] X World Sp
 <--------------------------------------------- Order Of Multiply for Column Major Matrices
 
 
+View Matrix : 
+
+glm::viewMatrix (glm::lookup) =   rotate                             translate
+				  -                                -        -                -
+				 |  rightx , righty, rightz, 0      |      | 1,  0,   0, -Px  |
+				 |  upx,     upy,    upz,   0       |   *  | 0,  1,   0, -Py  |
+				 |  forwardx, forwardy, forwardz, 0 |      | 0,  0,   1, -Pz  |
+				 |  0,       0,       0,     1,     |      | 0,  0,   0,  1   |
+				 |_								   _|      |_                _|
+				 
+Virtual Camera's Right, Up and Forward unit direction vectors
+P  = Virtual Camera ("eye") position vector in the world ( negative because we really move the world  in the opp direction of the camera)
+
+
+
+-------------------------
+Virtual Camera Notes : Without the depth buffer bit enabled, the cube looks weird rotating, so basically without the depth buffer enables the cube looks like the described view frustrum without the video being able to perceive the depth of pixels, hence the vertex are filled as such as the view frustrum.
+				 
+
+
 
  
 

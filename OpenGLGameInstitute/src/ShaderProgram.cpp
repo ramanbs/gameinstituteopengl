@@ -1,7 +1,8 @@
 #include "ShaderProgram.h"
 #include <fstream>
-#include <iostream>
+#include <iostream> 
 #include <sstream>
+#include "glm/gtc/type_ptr.hpp"
 
 ShaderProgram::ShaderProgram() 
 	:mHandle(0)
@@ -153,4 +154,12 @@ void ShaderProgram::setUniform(const GLchar* name, const glm::vec4& v)
 {
 	GLint loc = getUniformLocation(name);
 	glUniform4f(loc, v.x, v.y, v.z, v.w);
+}
+
+void ShaderProgram::setUniform(const GLchar* name, const glm::mat4& m)
+{
+	GLint loc = getUniformLocation(name);
+    
+	// 1 - no of matrices to be passed, GL_FALSE - whether to transpose the matrix or not, glm::value_ptr - get pointer of this matrix
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
 }

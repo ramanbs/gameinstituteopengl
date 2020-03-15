@@ -1,14 +1,15 @@
 #include <iostream>
 #include <sstream>
-#include "glm/glm.hpp"
 #include "GL/glew.h" // Always before GLFW, creates function pointer to all the openGl function supported for our graphics card driver at runtime
 #include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "ShaderProgram.h"
 #include "Texture2D.h"
 
 const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
-const std::string texture1FileName = "textures/airplane.png";
+const std::string texture1FileName = "textures/wooden_crate.jpg";
 const std::string texture2FileName = "textures/crate.jpg";
 
 GLFWwindow* gWindow = NULL;
@@ -41,15 +42,71 @@ int main()
 	//    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
 	//   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left (0,0) for u,v coordinates
 	//};
+	//TODO : In quad it was clockwise and now in cube they are using counter clockwise, why ?
 
-	GLuint indices[] = {
-		0, 1, 2, // tri 0
-		0, 2, 3 // tri 1
+	GLfloat vertices[] = {
+		// position		 // tex coords
+
+	   // front face
+	   -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
+		1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+		1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+	   -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
+	   -1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+
+		// back face
+		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+		 1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+
+		 // left face
+		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+		 -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+		 -1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+		 -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+		 -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+
+		 // right face
+		  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
+		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+		  1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
+		  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
+		  1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
+		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+
+		  // top face
+		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+		  1.0f,  1.0f,  1.0f, 1.0f, 0.0f,
+		  1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
+		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+		 -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
+		  1.0f,  1.0f,  1.0f, 1.0f, 0.0f,
+
+		  // bottom face
+		 -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
+		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+		  1.0f, -1.0f,  1.0f, 1.0f, 1.0f,
+		 -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
+		 -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
 	};
+
+	glm::vec3 cubePos = glm::vec3(0.0f, 0.0f, -5.0f);
+
+	// this is quad indices
+	//GLuint indices[] = {
+	//	0, 1, 2, // tri 0
+	//	0, 2, 3 // tri 1
+	//};
 
 	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
 	//also this means we are running in retained mode rather than immediate mode
-	GLuint vbo, ibo, vao;
+	GLuint vbo, vao;
 	glGenBuffers(1, &vbo); // creates a buffer in GPU memory
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); //makes the vbo buffer as current buffer, only one buffer at a time
 	
@@ -71,10 +128,10 @@ int main()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, (GLvoid*)((sizeof(GLfloat) * 3)));
 	glEnableVertexAttribArray(1);
 	
-	// Creating index buffer
-	glGenBuffers(1, &ibo);
+	// Creating index buffer - commenting out for cube implementation
+	/*glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
 
 	ShaderProgram shaderProgram;
 	shaderProgram.loadShaders("shaders/basic.vert", "shaders/basic.frag");
@@ -82,40 +139,78 @@ int main()
 	Texture2D texture1;
 	texture1.loadTexture(texture1FileName, true);
 
-	Texture2D texture2;
-	texture2.loadTexture(texture2FileName, true);
+	//Texture2D texture2;
+	//texture2.loadTexture(texture2FileName, true);
+
+	float cubeAngle = 0.0f;
+	double lastTime = glfwGetTime();
 
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
 	{
 		showFPS(gWindow);
+
+		double currentTime = glfwGetTime();
+		double deltaTime = currentTime - lastTime;
+
 		glfwPollEvents(); 
 
-		glClear(GL_COLOR_BUFFER_BIT); // without this old color wouldnt be cleared
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // without this old color wouldnt be cleared
 
 		texture1.bind(0); //TODO 0 - Texture unit that is used in shader by sampler, gives a location of the texture units. Shader can refrence multiple textures using this texture unit. You can have only one texture active (bound) at a time but can reference multiple texture units. Need to know more about this for more clarity, multiple tex units vs multiple texture.
-		texture2.bind(1);
+		//texture2.bind(1);
+
+		cubeAngle += (float)(deltaTime * 50.0f);
+		if (cubeAngle >= 360.0)
+			cubeAngle = 0.0f;
+
+		//create model, view and projection matrix
+		glm::mat4 model(1.0f), view(1.0f), projection(1.0f);
+
+		// glm::translate - translate the vertices of the model by the given positon
+		// glm::rotate - rotate the given model w.r.t given axis with angle in radians 
+		model = glm::translate(model, cubePos) * glm::rotate(model, glm::radians(cubeAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		glm::vec3 camPos(0.0f, 0.0f, 0.0f);
+		glm::vec3 targetPos(0.0f, 0.0f, -1.0f);
+		glm::vec3 up(0.0f, 1.0f, 0.0f);
+
+		// camPos or eyePos = glm::vec3 position the virtual camera is located in the world
+		// targetPos = the aim point where the camera should be looking
+		// up = up direction unit vector of the camera
+		// lookat generates the view matrix where in  everything translates and rotates in opp direction of the camera
+		view = glm::lookAt(camPos, targetPos, up);
+		//TODO : bookmarked perspective matrix derivation videos in virtual camera episode
+		// 45.0f - field of view angle, 1024/768 - aspect ratio, 0.1 - near plane, 100 - far plane
+		projection = glm::perspective(glm::radians(45.0f), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 100.0f);
 		
 		shaderProgram.use();// should be used before draw arrays
 
 		//set the locations of sampler in case of multiple texturing, have to be set after using the program. IT has to be active.
-		glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture1"), 0);
-		//TODO - compare with shader program implementation, and & remove accessor to program
-		glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture2"), 1);
+		//glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture1"), 0);
+		////TODO - compare with shader program implementation, and & remove accessor to program
+		//glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture2"), 1);
+
+		shaderProgram.setUniform("model", model);
+		shaderProgram.setUniform("view", view);
+		shaderProgram.setUniform("projection", projection);
 		
+
 		glBindVertexArray(vao); // bind to make vao active
 		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 
 		//glDrawArrays(GL_TRIANGLES, 0, 6);  - this now we dont use as we are using indexed buffer
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // primitive, number of vertices, type of indices buffer, offset from which to read the indices
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // primitive, number of vertices, type of indices buffer, offset from which to read the indices
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0); // unbind the active vao
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
+		lastTime = currentTime;
 	}
 
 	//Cleanup
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ibo);
+	//glDeleteBuffers(1, &ibo);
 
 	glfwTerminate();
 	return 0;
@@ -171,6 +266,8 @@ bool initOpenGL()
 	glClearColor(0.23f, 0.38f, 0.47f, 1.0f);
 	// resize viewport whenever window is resized
 	glViewport(0, 0, gWindowWidth, gWindowHeight);
+	// Enable this so that the pixels nearer to the camera are drawn last on top of compared to pixel further away
+	glEnable(GL_DEPTH_TEST);
 
 	return true;
 }

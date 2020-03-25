@@ -181,6 +181,13 @@ P  = Virtual Camera ("eye") position vector in the world ( negative because we r
 
 -------------------------
 Virtual Camera Notes : Without the depth buffer bit enabled, the cube looks weird rotating, so basically without the depth buffer enables the cube looks like the described view frustrum without the video being able to perceive the depth of pixels, hence the vertex are filled as such as the view frustrum.
+
+Orbit Camera : 
+updateCameraVectors() 
+
+For making a floor : We take the same cube and squish and stretch it with a different texture to make a floor out of it.
+
+
 				 
 
 

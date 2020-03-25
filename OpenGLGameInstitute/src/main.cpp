@@ -11,7 +11,7 @@
 
 const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
 const std::string texture1FileName = "textures/wooden_crate.jpg";
-const std::string texture2FileName = "textures/crate.jpg";
+const std::string texture2FileName = "textures/grid.jpg";
 
 float gCubeAngle = 0.0f;
 
@@ -149,8 +149,8 @@ int main()
 	Texture2D texture1;
 	texture1.loadTexture(texture1FileName, true);
 
-	//Texture2D texture2;
-	//texture2.loadTexture(texture2FileName, true);
+	Texture2D texture2;
+	texture2.loadTexture(texture2FileName, true);
 
 	double lastTime = glfwGetTime();
 
@@ -204,6 +204,18 @@ int main()
 		//glDrawArrays(GL_TRIANGLES, 0, 6);  - this now we dont use as we are using indexed buffer
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // primitive, number of vertices, type of indices buffer, offset from which to read the indices
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		//Drawing the floor
+
+		texture2.bind(0);
+		glm::vec3 floorPos;
+		floorPos.y = -1.0f; // Just below the cube
+		// scale the cube to the required size and then translate it to the required position 
+		model = glm::translate(model, floorPos) * glm::scale(model, glm::vec3(10.0f, 0.1f, 10.0f));
+
+		shaderProgram.setUniform("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0); // unbind the active vao
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer

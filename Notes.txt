@@ -187,6 +187,26 @@ updateCameraVectors()
 
 For making a floor : We take the same cube and squish and stretch it with a different texture to make a floor out of it.
 
+Meshes : 
+
+Wavefront .obj model file 
+
+Simpilified OBJ file format 
+
+1. #vertices (v) - x,y and z coordinates
+2. #texture coordinates (vt) - u, v and w coordinates (0-1 range)
+3. #normals (vn) - direction vectors for each vertex and point in the direction perpendicular to the face
+4. usemtl robot_body_material - not gonna use this 
+5. #faces - three or more sets of data - each face has three vertices we assumes and indices are mentioned for the properties that make up a face. e.g. 
+#faces
+f    6/1/1   7/2/2    3/3/3
+--   v/vt/vn v/vt/vn  v/vt/vn
+
+Other commands in obj file not covered : 
+g -  group
+o - objects or groups of groups
+s - smoothing group
+
 
 				 
 

@@ -116,6 +116,9 @@ void Mesh::draw()
 	if (!mLoaded) return;
 
 	glBindVertexArray(mVAO);
+	// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 
+		//glDrawArrays(GL_TRIANGLES, 0, 6);  - this now we dont use as we are using indexed buffer
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // primitive, number of vertices, type of indices buffer, offset from which to read the indice
 	glDrawArrays(GL_TRIANGLES, 0, mVertices.size());
 	glBindVertexArray(0);
 }

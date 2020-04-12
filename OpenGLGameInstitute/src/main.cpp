@@ -11,10 +11,8 @@
 #include "Mesh.h"
 
 const char* APP_TITLE = "OPENGL WIndow - Hello Shader!";
-const std::string texture1FileName = "textures/wooden_crate.jpg";
-const std::string texture2FileName = "textures/grid.jpg";
 
-FPSCamera fpsCamera(glm::vec3(0.0f, 0.0f, 5.0f));
+FPSCamera fpsCamera(glm::vec3(0.0f, 3.0f, 10.0f));
 const double ZOOM_SENSITIVITY = -3.0f;
 const float MOVE_SPEED = 5.0f;
 const float MOUSE_SENSITIVITY = 0.1f;
@@ -60,73 +58,14 @@ int main()
 	//    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
 	//   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left (0,0) for u,v coordinates
 	//};
-	//TODO : In quad it was clockwise and now in cube they are using counter clockwise, why ?
+	// In quad it was clockwise and now in cube they are using counter clockwise, why ? - Because winding order does not matter if we dont specify - answer is given by author in udemy
 
-	GLfloat vertices[] = {
-		// position		 // tex coords
-
-	   // front face
-	   -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-		1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-		1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
-	   -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-	   -1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
-		1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-
-		// back face
-		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-		 1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-
-		 // left face
-		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-		 -1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
-		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-		 -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-
-		 // right face
-		  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-		  1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-		  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-		  1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-
-		  // top face
-		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		  1.0f,  1.0f,  1.0f, 1.0f, 0.0f,
-		  1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
-		  1.0f,  1.0f,  1.0f, 1.0f, 0.0f,
-
-		  // bottom face
-		 -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-		  1.0f, -1.0f,  1.0f, 1.0f, 1.0f,
-		 -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
-		 -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-	};
-
-	glm::vec3 cubePos = glm::vec3(0.0f, 0.0f, -5.0f);
-	glm::vec3 floorPos = glm::vec3(0.0f, -1.0f, 0.0f); // Just below the cube
-	// scale the cube to the required size and then translate it to the required position 
-
+	// GLfloat vertices[] = was earlier using this to specify quad or triangle vertices manually 
 	// this is quad indices
 	//GLuint indices[] = {
 	//	0, 1, 2, // tri 0
 	//	0, 2, 3 // tri 1
 	//};
-
-	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
-	//also this means we are running in retained mode rather than immediate mode
-	GLuint vbo, vao;
 
 	// Creating index buffer - commenting out for cube implementation
 	/*glGenBuffers(1, &ibo);
@@ -136,11 +75,38 @@ int main()
 	ShaderProgram shaderProgram;
 	shaderProgram.loadShaders("shaders/basic.vert", "shaders/basic.frag");
 
-	Texture2D texture1;
-	texture1.loadTexture(texture1FileName, true);
+	//Model Positions
 
-	Texture2D texture2;
-	texture2.loadTexture(texture2FileName, true);
+	glm::vec3 modelPos[] = {
+		glm::vec3(-2.5f, 1.0f, 0.0f),  //crate
+		glm::vec3(2.5f, 1.0f, 0.0f),  //wood crate
+		glm::vec3(0.0f, 0.0f, -2.0f),  //robot
+		glm::vec3(0.0f, 0.0f, 0.0f),  //floor
+	};
+
+	// Model scale
+
+	glm::vec3 modelScale[] = {
+		glm::vec3(1.0f, 1.0f, 1.0f),  //crate
+		glm::vec3(1.0f, 1.0f, 1.0f),  //wood crate
+		glm::vec3(1.0f, 1.0f, 1.0f),  //robot
+		glm::vec3(10.0f, 1.0f, 10.0f),  //floor
+	};
+
+	// Load meshes and textures
+	const int numModels = 4;
+	Mesh mesh[numModels];
+	Texture2D texture[numModels];
+
+	mesh[0].loadOBJ("models/crate.obj");
+	mesh[1].loadOBJ("models/woodcrate.obj");
+	mesh[2].loadOBJ("models/robot.obj");
+	mesh[3].loadOBJ("models/floor.obj");
+
+	texture[0].loadTexture("textures/crate.jpg", true);
+	texture[1].loadTexture("textures/woodcrate_diffuse.jpg", true);
+	texture[2].loadTexture("textures/robot_diffuse.jpg", true);
+	texture[3].loadTexture("textures/tile_floor.jpg", true);
 
 	double lastTime = glfwGetTime();
 
@@ -157,8 +123,7 @@ int main()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // without this old color wouldnt be cleared
 
-		texture1.bind(0); //TODO 0 - Texture unit that is used in shader by sampler, gives a location of the texture units. Shader can refrence multiple textures using this texture unit. You can have only one texture active (bound) at a time but can reference multiple texture units. Need to know more about this for more clarity, multiple tex units vs multiple texture.
-		//texture2.bind(1);
+
 
 
 		//create model, view and projection matrix
@@ -168,12 +133,10 @@ int main()
 		//orbitCamera.rotate(gYaw, gPitch);
 		//orbitCamera.setRadius(gRadius);
 
-
-
 		// glm::translate - translate the vertices of the model by the given positon
 		// glm::rotate - rotate the given model w.r.t given axis with angle in radians 
 		// glm::vec3(0.0f, 1.0f, 0.0f) - tells rotate function which axis to rotate against
-		model = glm::translate(model, cubePos);
+	
 
 		view = fpsCamera.getViewMatrix();
 		//TODO : bookmarked perspective matrix derivation videos in virtual camera 1 episode
@@ -189,36 +152,25 @@ int main()
 		////TODO - compare with shader program implementation, and & remove accessor to program
 		//glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture2"), 1);
 
-		shaderProgram.setUniform("model", model);
+		
 		shaderProgram.setUniform("view", view);
 		shaderProgram.setUniform("projection", projection);
-		
 
-		glBindVertexArray(vao); // bind to make vao active
-		// GL_TRIANGLES - what kind of primitive are we drawing, 0 - the first component in vao to be drawn, 3 - number of vertices, in this case x,y,z 
-		//glDrawArrays(GL_TRIANGLES, 0, 6);  - this now we dont use as we are using indexed buffer
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // primitive, number of vertices, type of indices buffer, offset from which to read the indices
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (int i = 0; i < numModels; i++) 
+		{
+			model = glm::translate(glm::mat4(1.0f), modelPos[i]) * glm::scale(glm::mat4(1.0f), modelScale[i]);
+			
+			shaderProgram.setUniform("model", model);
 
-		//Drawing the floor
+			texture[i].bind(0);
+			mesh[i].draw();
+			texture[i].unbind(0);
+		}
 
-		texture2.bind(0);
-
-		model = glm::translate(model, floorPos) * glm::scale(model, glm::vec3(10.0f, 0.1f, 10.0f));
-
-		shaderProgram.setUniform("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		glBindVertexArray(0); // unbind the active vao
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
 		lastTime = currentTime;
 	}
-
-	//Cleanup
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
-	//glDeleteBuffers(1, &ibo);
 
 	glfwTerminate();
 	return 0;
@@ -291,16 +243,16 @@ void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode)
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	//if (key == GLFW_KEY_W && action == GLFW_PRESS)
-	//{
-	//	gWireframe = !gWireframe;
+	if (key == GLFW_KEY_G && action == GLFW_PRESS)
+	{
+		gWireframe = !gWireframe;
 
-	//	//GL_FRONT_AND_BACK - winding order of vertices
-	//	if (gWireframe)
-	//		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//	else
-	//		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//}
+		//GL_FRONT_AND_BACK - winding order of vertices
+		if (gWireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 void glfw_OnFrameBufferSize(GLFWwindow* window, int width, int height) 

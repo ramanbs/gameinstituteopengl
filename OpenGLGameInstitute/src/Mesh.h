@@ -27,6 +27,8 @@ private:
 
 	bool mLoaded;
 	std::vector<Vertex> mVertices;
+	//Vertex Buffer Object - generic place in GPU memory to hold vertices and minimize the traffic b/w CPU and GPU
+//also this means we are running in retained mode rather than immediate mode
 	GLuint mVBO, mVAO;
 };
 

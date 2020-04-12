@@ -76,8 +76,15 @@ bool Texture2D::loadTexture(const string& fileName, bool generateMipMaps)
 	return true;
 }
 
+//TODO 0 - Texture unit that is used in shader by sampler, gives a location of the texture units. Shader can refrence multiple textures using this texture unit. You can have only one texture active (bound) at a time but can reference multiple texture units. Need to know more about this for more clarity, multiple tex units vs multiple texture.
 void Texture2D::bind(GLuint texUnit) 
 {
 	glActiveTexture(GL_TEXTURE0 + texUnit); // activate the texture unit 0, so that when we bind the texture next, it gets attached to this texture unit. We can have upto 16 texture units at the sam time available for shader to be blended.//TODO : api to query how many tex units available fo rour graphics card 
 	glBindTexture(GL_TEXTURE_2D, mTexture);
+}
+
+void Texture2D::unbind(GLuint texUnit)
+{
+	glActiveTexture(GL_TEXTURE0 + texUnit);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

@@ -34,7 +34,7 @@ Vertex Buffer Object - OpenGL Object - generic place in memeory to hold data, so
 //GL_STATIC_DRAW - create once, setup once use it a lot, GL_DYNAMIC_DRAW - create once, change a lot and use it a lot, GL_STREAM_DRAW - create once, setup once and use once
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
 
-For core openGL we need to create VertexArrayObject - holds info for our buffer so that when we draw we need not refer buffer object but VAO instead. MOst meshes object holds a collections of one or more VBO which holds vertext point, vertex normal, texture coords. Older OpenGL needs to bind each data buffer and define memory layout every time you need to draw. VAO collects various info like pointer to VBO and only VAO can be binded and used before we draw something instead of providing everything every time we need to draw something (old way of doing it)
+For core openGL we need to create VertexArrayObject - holds info for our buffer so that when we draw we need not refer buffer object but VAO instead. MOst meshes object holds a collections of one or more VBO which holds vertex point, vertex normal, texture coords. Older OpenGL needs to bind each data buffer and define memory layout every time you need to draw. VAO collects various info like pointer to VBO and only VAO can be binded and used before we draw something instead of providing everything every time we need to draw something (old way of doing it)
 
 Steps for creating shader : 
 
@@ -206,6 +206,49 @@ Other commands in obj file not covered :
 g -  group
 o - objects or groups of groups
 s - smoothing group
+
+-----------------------------------------------------------------------------------------------------------------------
+Lighting : 
+
+Global Illumination : real world lighting difficult to simulate, it comprises of direct and indirect lighting. Global illumination details the indirect lighting in the world, like the light reflected or refracted from other nearby objects depending upon the reflective nature of the surrounding objects. 
+
+GI uses two techniques : 
+
+1. Radiosity
+
+2. Raytracing
+
+We will be doing Local Lighting 
+
+Covering Phong Model : According to Phong model any surface has 4 properties related to lighting and we are covering three common ones : 
+
+1. Ambient : light that exists in the scene, approximates the GI without any complicated ray tracing techniques, it gives a slight color to the surface and is a summation of the effects of things nearby that affects the gievn surface. Its generally a low value.
+
+2. Diffuse : Reflects light from surface in a scattering type of pattern. Gives generally a rough and porous surface color.
+
+3. Specular : Gives shiny spot to the surface, makes surface appear shiny and hard.
+
+4. Emit : self illumination or glow effect.
+
+Ambient + Diffuse + Specular = Combined Phong Surface
+
+Gouraud Shading : It is very similar to Phong shading except for where the calculation happen for a mesh.
+Gouraud calculations happen per-vertex and Phong the calculations happen per-fragment.  
+Gouraud depends on polygon count, higher the poly count more better the lighting is.
+
+Lambert's law of reflection (diffuse component): In optics, Lambert's cosine law says that the radiant intensity or luminous intensity observed from an ideal diffusely reflecting surface or ideal diffuse radiator is directly proportional to the cosine of the angle θ between the direction of the incident light and the surface normal. (https://en.wikipedia.org/wiki/Lambert%27s_cosine_law)
+
+If a light ray is incident on the surface, then the intenisty of the color is equal to the dot product of the light ray l and normal of the surface n : 
+
+Intensity = |l| . |n| 
+          = l * n * cos(theta)
+ if l and n are normalized unit vector then 
+          = cos(theta)
+		  
+hence cos(0)  = 1
+and cos(90) = 0, thereby if the directional light is at 90 degree to normal of surface, then no color is visible on the surface.
+
+
 
 
 				 

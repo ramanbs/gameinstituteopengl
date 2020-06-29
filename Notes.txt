@@ -224,9 +224,30 @@ Covering Phong Model : According to Phong model any surface has 4 properties rel
 
 1. Ambient : light that exists in the scene, approximates the GI without any complicated ray tracing techniques, it gives a slight color to the surface and is a summation of the effects of things nearby that affects the gievn surface. Its generally a low value.
 
-2. Diffuse : Reflects light from surface in a scattering type of pattern. Gives generally a rough and porous surface color.
 
-3. Specular : Gives shiny spot to the surface, makes surface appear shiny and hard.
+
+2. Diffuse : Reflects light from surface in a scattering type of pattern. Gives generally a rough and porous surface color.
+Its the relation between normal and light vector
+
+Diffuse = |l|. |n| (l - light vector, n - normal vector)
+
+3. Specular : Gives shiny spot to the surface, makes surface appear shiny and hard. the bigger the shininess factor the smaller the white spot (more shiny)
+Its the relation between view and reflection vector
+
+Specular = (|r|. |v|) ^ shininess (r - reflection vector, v - view vector) // Phong Model
+
+Phong Model has an issue when angle betwen the view vector and reflection vector is more than 90 degree. The specular highlight gets cut-off at that point
+
+To avoid this Blinn-Phong was introduced, it is the relationship between the half vector and the normal to the surface.
+
+Half-vector : its is vector halfway between the angle made by the view and light vector (this would never be greater than 90 degree)
+
+Blinn-Phong - specular = (|n| . |h|) ^ shininess n - normal, h - half vector
+
+
+We get the reflection vector using GLSL function, that takes in lightDir and normal to the surface as input
+
+
 
 4. Emit : self illumination or glow effect.
 
@@ -246,7 +267,21 @@ Intensity = |l| . |n|
           = cos(theta)
 		  
 hence cos(0)  = 1
-and cos(90) = 0, thereby if the directional light is at 90 degree to normal of surface, then no color is visible on the surface.
+and cos(90) = 0, thereby if the directional light is at 90 degree to normal of surface, then no color is visible on the surface. 
+
+LIGHT COLORS AND OBJECT MATERIALS
+----------------------------------------------------------------------
+light    -> 3 color components : ambient, diffuse, specular
+
+material -> 3 color components : ambient, diffuse, specular and shininess
+
+color (ambient) = material(a) * light(a)
+
+color (diffuse) = material(d) * light(d) * (|n| . |l|)
+
+color (specular) = material(s) * light(s) * ((|n| . |h|) ^ material(shininess))
+
+frag_color = color(a) + color(d) + color(s)
 
 
 

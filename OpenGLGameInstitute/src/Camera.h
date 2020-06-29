@@ -23,6 +23,7 @@ public:
 	const glm::vec3& getLook() const; // same as forward vector specified in orbit camera class
 	const glm::vec3& getRight() const;
 	const glm::vec3& getUp() const;
+	const glm::vec3& getPosition() const;
 
 	float getFOV() const { return mFOV; }
 	void setFOV(float fov) { mFOV = fov; } // in degrees

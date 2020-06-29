@@ -72,16 +72,22 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
 
-	ShaderProgram shaderProgram;
-	shaderProgram.loadShaders("shaders/basic.vert", "shaders/basic.frag");
+	ShaderProgram lightShader;
+	lightShader.loadShaders("shaders/basic.vert", "shaders/basic.frag");
+	
+	ShaderProgram lightingShader;
+	lightingShader.loadShaders("shaders/lighting.vert", "shaders/lighting.frag");
 
 	//Model Positions
 
+	// Model positions
 	glm::vec3 modelPos[] = {
-		glm::vec3(-2.5f, 1.0f, 0.0f),  //crate
-		glm::vec3(2.5f, 1.0f, 0.0f),  //wood crate
-		glm::vec3(0.0f, 0.0f, -2.0f),  //robot
-		glm::vec3(0.0f, 0.0f, 0.0f),  //floor
+		glm::vec3(-3.5f, 0.0f, 0.0f),	// crate1
+		glm::vec3(3.5f, 0.0f, 0.0f),	// crate2
+		glm::vec3(0.0f, 0.0f, -2.0f),	// robot
+		glm::vec3(0.0f, 0.0f, 0.0f),	// floor
+		glm::vec3(0.0f, 0.0f, 2.0f),	// pin
+		glm::vec3(-2.0f, 0.0f, 2.0f)	// bunny
 	};
 
 	// Model scale
@@ -91,10 +97,12 @@ int main()
 		glm::vec3(1.0f, 1.0f, 1.0f),  //wood crate
 		glm::vec3(1.0f, 1.0f, 1.0f),  //robot
 		glm::vec3(10.0f, 1.0f, 10.0f),  //floor
+		glm::vec3(0.1f, 0.1f, 0.1f),  //pin
+		glm::vec3(0.7f, 0.7f, 0.7f)  //bunny
 	};
 
 	// Load meshes and textures
-	const int numModels = 4;
+	const int numModels = 6;
 	Mesh mesh[numModels];
 	Texture2D texture[numModels];
 
@@ -102,13 +110,21 @@ int main()
 	mesh[1].loadOBJ("models/woodcrate.obj");
 	mesh[2].loadOBJ("models/robot.obj");
 	mesh[3].loadOBJ("models/floor.obj");
+	mesh[4].loadOBJ("models/bowling_pin.obj");
+	mesh[5].loadOBJ("models/bunny.obj");
 
 	texture[0].loadTexture("textures/crate.jpg", true);
 	texture[1].loadTexture("textures/woodcrate_diffuse.jpg", true);
 	texture[2].loadTexture("textures/robot_diffuse.jpg", true);
 	texture[3].loadTexture("textures/tile_floor.jpg", true);
+	texture[4].loadTexture("textures/AMF.tga", true);
+	texture[5].loadTexture("textures/bunny_diffuse.jpg", true);
+
+	Mesh lightMesh;
+	lightMesh.loadOBJ("models/light.obj");
 
 	double lastTime = glfwGetTime();
+	float angle = 0.0f;
 
 	// Main Loop
 	while (!glfwWindowShouldClose(gWindow))
@@ -122,9 +138,6 @@ int main()
 		update(deltaTime);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // without this old color wouldnt be cleared
-
-
-
 
 		//create model, view and projection matrix
 		glm::mat4 model(1.0f), view(1.0f), projection(1.0f);
@@ -144,8 +157,21 @@ int main()
 		//projection = glm::perspective(glm::radians(45.0f), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 100.0f);
 
 		projection = glm::perspective(glm::radians(fpsCamera.getFOV()), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 100.0f);
+
+		glm::vec3 viewPos;
+		viewPos.x = fpsCamera.getPosition().x;
+		viewPos.y = fpsCamera.getPosition().y;
+		viewPos.z = fpsCamera.getPosition().z;
+
+		// the light 
+		glm::vec3 lightPos(0.0f, 1.0f, 10.0f);
+		glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+
+		// move the light
+		angle += (float)deltaTime * 50.0f;
+		lightPos.x = 8.0f * sinf(glm::radians(angle));
 		
-		shaderProgram.use();// should be used before draw arrays
+		lightingShader.use();// should be used before draw arrays
 
 		//set the locations of sampler in case of multiple texturing, have to be set after using the program. IT has to be active.
 		//glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture1"), 0);
@@ -153,20 +179,32 @@ int main()
 		//glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture2"), 1);
 
 		
-		shaderProgram.setUniform("view", view);
-		shaderProgram.setUniform("projection", projection);
+		lightingShader.setUniform("view", view);
+		lightingShader.setUniform("projection", projection);
+		lightingShader.setUniform("lightColor", lightColor);
+		lightingShader.setUniform("lightPos", lightPos);
+		lightingShader.setUniform("viewPos", viewPos);
 
 		for (int i = 0; i < numModels; i++) 
 		{
 			model = glm::translate(glm::mat4(1.0f), modelPos[i]) * glm::scale(glm::mat4(1.0f), modelScale[i]);
 			
-			shaderProgram.setUniform("model", model);
+			lightingShader.setUniform("model", model);
 
 			texture[i].bind(0);
 			mesh[i].draw();
 			texture[i].unbind(0);
 		}
 
+		//render the light
+		model = glm::translate(glm::mat4(), lightPos);
+		lightShader.use();
+		lightShader.setUniform("lightColor", lightColor);
+		lightShader.setUniform("model", model);
+		lightShader.setUniform("view", view);
+		lightShader.setUniform("projection", projection);
+
+		lightMesh.draw();
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
 		lastTime = currentTime;

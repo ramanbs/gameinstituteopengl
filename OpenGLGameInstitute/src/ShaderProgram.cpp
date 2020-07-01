@@ -163,3 +163,16 @@ void ShaderProgram::setUniform(const GLchar* name, const glm::mat4& m)
 	// 1 - no of matrices to be passed, GL_FALSE - whether to transpose the matrix or not, glm::value_ptr - get pointer of this matrix
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
 }
+
+void ShaderProgram::setUniform(const GLchar* name, const GLfloat& f)
+{
+	GLint loc = getUniformLocation(name);
+	glUniform1f(loc, f);
+}
+
+void ShaderProgram::setUniformSampler(const GLchar* name, const GLint& slot)
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	GLint loc = getUniformLocation(name);
+	glUniform1i(loc, slot);
+}

@@ -277,11 +277,16 @@ material -> 3 color components : ambient, diffuse, specular and shininess
 
 color (ambient) = material(a) * light(a)
 
-color (diffuse) = material(d) * light(d) * (|n| . |l|)
+color (diffuse) = material(d) * light(d) * (|n| . |l|) (|n| . |l| is also the brightness factor)
 
 color (specular) = material(s) * light(s) * ((|n| . |h|) ^ material(shininess))
 
 frag_color = color(a) + color(d) + color(s)
+
+
+Non-uniform Scaling affects Normals
+------------------------------------------------------
+Transpose of inverse of the model matrix can resolve the issue of changing normals due to non-uniform scaling and multiplying that with the normal
 
 
 

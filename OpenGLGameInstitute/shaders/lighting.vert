@@ -14,9 +14,9 @@ out vec3 FragPos; // light position in world space;
 
 void main()
 {
+	Normal = mat3(transpose(inverse(model))) * normal; // to fix the normals if changed due to scaling
 	gl_Position = projection * view * model * vec4(pos, 1.0f); // w - coordinate is set to 1, as its a flat triangle ina normalized device space
 	
 	TexCoord = texCoord;
-	Normal = normal;
 	FragPos = vec3(model * vec4(pos, 1.0f));
 };

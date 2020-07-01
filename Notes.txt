@@ -293,6 +293,27 @@ TYPES OF LIGHTS
 
 1. Directional Light : This is similar to sun, considered so far away that the rays are almost parallel to each other and what really matters is the direction.
 
+2 Point Lights : They have a position but are omni-directional and light rays lose strength over distance. Fading of light over distance is called attenuation
+
+Attenuation (Radial Distance Over Light) 
+--------------------------------------------\
+
+F(attenuation) = 1.0/ (K(c) + K(l) * d + K(q) * (d^2))
+
+where K(c) - contant term, usually 1.0
+
+K(l) = linear term
+
+K(q) = Quadratic Term
+
+d = distance of vertex from light source
+
+
+Only specular and diffuse are affected by attenuation, ambient remains same to maintain that light.
+
+diffuse *= attenuation
+specular*= attenuation
+
 
 
 

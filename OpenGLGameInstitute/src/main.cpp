@@ -76,7 +76,7 @@ int main()
 	lightShader.loadShaders("shaders/basic.vert", "shaders/basic.frag");
 	
 	ShaderProgram lightingShader;
-	lightingShader.loadShaders("shaders/lighting_dir.vert", "shaders/lighting_dir.frag");
+	lightingShader.loadShaders("shaders/lighting_point.vert", "shaders/lighting_point.frag");
 
 	//Model Positions
 
@@ -87,7 +87,8 @@ int main()
 		glm::vec3(0.0f, 0.0f, -2.0f),	// robot
 		glm::vec3(0.0f, 0.0f, 0.0f),	// floor
 		glm::vec3(0.0f, 0.0f, 2.0f),	// pin
-		glm::vec3(-2.0f, 0.0f, 2.0f)	// bunny
+		glm::vec3(-2.0f, 0.0f, 2.0f),	// bunny
+		glm::vec3(-2.0f, 0.0f, 0.0f)    // lamp post
 	};
 
 	// Model scale
@@ -98,11 +99,12 @@ int main()
 		glm::vec3(1.0f, 1.0f, 1.0f),  //robot
 		glm::vec3(10.0f, 1.0f, 10.0f),  //floor
 		glm::vec3(0.1f, 0.1f, 0.1f),  //pin
-		glm::vec3(0.7f, 0.7f, 0.7f)  //bunny
+		glm::vec3(0.7f, 0.7f, 0.7f),  //bunny
+		glm::vec3(1.0f, 1.0f, 1.0f) // Lamp Post
 	};
 
 	// Load meshes and textures
-	const int numModels = 6;
+	const int numModels = 7;
 	Mesh mesh[numModels];
 	Texture2D texture[numModels];
 
@@ -112,6 +114,7 @@ int main()
 	mesh[3].loadOBJ("models/floor.obj");
 	mesh[4].loadOBJ("models/bowling_pin.obj");
 	mesh[5].loadOBJ("models/bunny.obj");
+	mesh[6].loadOBJ("models/lampPost.obj");
 
 	texture[0].loadTexture("textures/crate.jpg", true);
 	texture[1].loadTexture("textures/woodcrate_diffuse.jpg", true);
@@ -119,6 +122,7 @@ int main()
 	texture[3].loadTexture("textures/tile_floor.jpg", true);
 	texture[4].loadTexture("textures/AMF.tga", true);
 	texture[5].loadTexture("textures/bunny_diffuse.jpg", true);
+	texture[6].loadTexture("textures/lamp_post_diffuse.png", true);
 
 	Mesh lightMesh;
 	lightMesh.loadOBJ("models/light.obj");
@@ -164,13 +168,17 @@ int main()
 		viewPos.z = fpsCamera.getPosition().z;
 
 		// the light 
-		glm::vec3 lightPos(0.0f, 1.0f, 10.0f);
+		glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 		glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 		glm::vec3 lightDirection(0.0f, -0.9f, -0.17f); // negative w.r.t. camera
 
 		// move the light
 		angle += (float)deltaTime * 50.0f;
-		lightPos.x = 8.0f * sinf(glm::radians(angle));
+		modelPos[6].x = 3.0f * sinf(glm::radians(angle));
+		modelPos[6].z = 14.0f + 10.0f * sinf(glm::radians(angle));
+
+		lightPos = modelPos[6];
+		lightPos.y += 3.8f;
 		
 		lightingShader.use();// should be used before draw arrays
 
@@ -183,10 +191,17 @@ int main()
 		lightingShader.setUniform("view", view);
 		lightingShader.setUniform("projection", projection);
 		lightingShader.setUniform("viewPos", viewPos);
+
+		// Point Light
 		lightingShader.setUniform("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 		lightingShader.setUniform("light.diffuse", lightColor);
 		lightingShader.setUniform("light.specular", glm::vec3(1.0f, 0.8f, 0.0f));
-		lightingShader.setUniform("light.direction", lightDirection);
+		lightingShader.setUniform("light.position", lightPos);
+		
+		// Attenuation - values are taken for light with radius - 65
+		lightingShader.setUniform("light.constant", 1.0f);
+		lightingShader.setUniform("light.linear", 0.07f);
+		lightingShader.setUniform("light.exponent", 0.017f);
 		
 
 		for (int i = 0; i < numModels; i++) 

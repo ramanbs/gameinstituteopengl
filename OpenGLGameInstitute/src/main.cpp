@@ -76,7 +76,7 @@ int main()
 	lightShader.loadShaders("shaders/basic.vert", "shaders/basic.frag");
 	
 	ShaderProgram lightingShader;
-	lightingShader.loadShaders("shaders/lighting.vert", "shaders/lighting.frag");
+	lightingShader.loadShaders("shaders/lighting_dir.vert", "shaders/lighting_dir.frag");
 
 	//Model Positions
 
@@ -166,6 +166,7 @@ int main()
 		// the light 
 		glm::vec3 lightPos(0.0f, 1.0f, 10.0f);
 		glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+		glm::vec3 lightDirection(0.0f, -0.9f, -0.17f); // negative w.r.t. camera
 
 		// move the light
 		angle += (float)deltaTime * 50.0f;
@@ -185,7 +186,7 @@ int main()
 		lightingShader.setUniform("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 		lightingShader.setUniform("light.diffuse", lightColor);
 		lightingShader.setUniform("light.specular", glm::vec3(1.0f, 0.8f, 0.0f));
-		lightingShader.setUniform("light.position", lightPos);
+		lightingShader.setUniform("light.direction", lightDirection);
 		
 
 		for (int i = 0; i < numModels; i++) 
@@ -204,15 +205,15 @@ int main()
 			texture[i].unbind(0);
 		}
 
-		//render the light
-		model = glm::translate(glm::mat4(), lightPos);
-		lightShader.use();
-		lightShader.setUniform("lightColor", lightColor);
-		lightShader.setUniform("model", model);
-		lightShader.setUniform("view", view);
-		lightShader.setUniform("projection", projection);
+		////render the light
+		//model = glm::translate(glm::mat4(), lightPos);
+		//lightShader.use();
+		//lightShader.setUniform("lightColor", lightColor);
+		//lightShader.setUniform("model", model);
+		//lightShader.setUniform("view", view);
+		//lightShader.setUniform("projection", projection);
 
-		lightMesh.draw();
+		//lightMesh.draw();
 
 		glfwSwapBuffers(gWindow); // makes our application double buffered - front and back buffer
 		lastTime = currentTime;

@@ -288,6 +288,11 @@ Non-uniform Scaling affects Normals
 ------------------------------------------------------
 Transpose of inverse of the model matrix can resolve the issue of changing normals due to non-uniform scaling and multiplying that with the normal
 
+TYPES OF LIGHTS
+---------------------------
+
+1. Directional Light : This is similar to sun, considered so far away that the rays are almost parallel to each other and what really matters is the direction.
+
 
 
 

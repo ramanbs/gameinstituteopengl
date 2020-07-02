@@ -32,6 +32,7 @@ int gWindowHeight = 768;
 
 bool gFullscreen = false;
 bool gWireframe = false;
+bool gFlashlightOn = true;
 
 
 void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode);
@@ -76,7 +77,7 @@ int main()
 	lightShader.loadShaders("shaders/basic.vert", "shaders/basic.frag");
 	
 	ShaderProgram lightingShader;
-	lightingShader.loadShaders("shaders/lighting_point.vert", "shaders/lighting_point.frag");
+	lightingShader.loadShaders("shaders/lighting_spot.vert", "shaders/lighting_spot.frag");
 
 	//Model Positions
 
@@ -88,7 +89,7 @@ int main()
 		glm::vec3(0.0f, 0.0f, 0.0f),	// floor
 		glm::vec3(0.0f, 0.0f, 2.0f),	// pin
 		glm::vec3(-2.0f, 0.0f, 2.0f),	// bunny
-		glm::vec3(-2.0f, 0.0f, 0.0f)    // lamp post
+		glm::vec3(-5.0f, 0.0f, 0.0f)    // lamp post
 	};
 
 	// Model scale
@@ -168,19 +169,12 @@ int main()
 		viewPos.z = fpsCamera.getPosition().z;
 
 		// the light 
-		glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+		glm::vec3 lightPos = fpsCamera.getPosition();
 		glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-		glm::vec3 lightDirection(0.0f, -0.9f, -0.17f); // negative w.r.t. camera
 
-		// move the light
-		angle += (float)deltaTime * 50.0f;
-		modelPos[6].x = 3.0f * sinf(glm::radians(angle));
-		modelPos[6].z = 14.0f + 10.0f * sinf(glm::radians(angle));
+		lightPos.y -= 0.5f;
 
-		lightPos = modelPos[6];
-		lightPos.y += 3.8f;
-		
-		lightingShader.use();// should be used before draw arrays
+		lightingShader.use();// should be used before draw arrays and setting uniforms
 
 		//set the locations of sampler in case of multiple texturing, have to be set after using the program. IT has to be active.
 		//glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "myTexture1"), 0);
@@ -194,15 +188,22 @@ int main()
 
 		// Point Light
 		lightingShader.setUniform("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-		lightingShader.setUniform("light.diffuse", lightColor);
-		lightingShader.setUniform("light.specular", glm::vec3(1.0f, 0.8f, 0.0f));
+		lightingShader.setUniform("light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		lightingShader.setUniform("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		lightingShader.setUniform("light.position", lightPos);
+		lightingShader.setUniform("light.direction", fpsCamera.getLook());
 		
 		// Attenuation - values are taken for light with radius - 65
 		lightingShader.setUniform("light.constant", 1.0f);
 		lightingShader.setUniform("light.linear", 0.07f);
 		lightingShader.setUniform("light.exponent", 0.017f);
-		
+
+		// Setting the angles for inner and outer cone in spot light
+		// To compute the two angles of the cone, we use the direction vector.
+		// |lightDir| . |spotLightDir| = cos(theta)
+		lightingShader.setUniform("light.cosInnerCone", glm::cos(glm::radians(15.0f)));
+		lightingShader.setUniform("light.cosOuterCone", glm::cos(glm::radians(20.0f)));
+		lightingShader.setUniform("light.on", gFlashlightOn);
 
 		for (int i = 0; i < numModels; i++) 
 		{
@@ -212,7 +213,7 @@ int main()
 
 			lightingShader.setUniform("material.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
 			lightingShader.setUniformSampler("material.diffuseMap", 0);
-			lightingShader.setUniform("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			lightingShader.setUniform("material.specular", glm::vec3(0.8f, 0.8f, 0.8f));
 			lightingShader.setUniform("material.shininess", 32);
 
 			texture[i].bind(0);
@@ -315,6 +316,9 @@ void glfw_onKey(GLFWwindow* window, int key, int scanCode, int action, int mode)
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+		gFlashlightOn = !gFlashlightOn;
 }
 
 void glfw_OnFrameBufferSize(GLFWwindow* window, int width, int height) 

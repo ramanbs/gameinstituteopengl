@@ -308,11 +308,23 @@ K(q) = Quadratic Term
 
 d = distance of vertex from light source
 
+(These values are pre-determing in tabular form )
 
 Only specular and diffuse are affected by attenuation, ambient remains same to maintain that light.
 
 diffuse *= attenuation
 specular*= attenuation
+
+
+3. Spot Lights : Light spreads in a conical fashion. There are two types : single cone spot light and dual cone spot light.
+
+In Dual Cone : The inner cone where the light is the brightest and things in outer cone get affected by light. Anywhere outside the outer cone is dark. The light between the cones fades out until it reaches the outer cone.
+
+Smoothstep(outer, inner, theta) : Smoothstep provides smooth linear interpolation between the two cones using the step value given as theta. In a graph, linear interpolation gives a straight line between two points but in smoothstep we get a curved line that is straight in the middle a litlle. it goes under the straight line initially, merges in the middle and then goes above the normal linear interpolation line like a curve, when comparing.
+
+To compute the two angles of the cone, we use the direction vector. 
+
+|lightDir| . |spotLightDir| = cos(theta)
 
 
 

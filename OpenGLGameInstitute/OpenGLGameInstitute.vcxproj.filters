@@ -54,5 +54,7 @@
     <None Include="shaders\lighting_dir.vert" />
     <None Include="shaders\lighting_point.frag" />
     <None Include="shaders\lighting_point.vert" />
+    <None Include="shaders\lighting_spot.frag" />
+    <None Include="shaders\lighting_spot.vert" />
   </ItemGroup>
 </Project>

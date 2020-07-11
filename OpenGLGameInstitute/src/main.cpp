@@ -214,7 +214,7 @@ int main()
 			lightingShader.setUniform("material.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
 			lightingShader.setUniformSampler("material.diffuseMap", 0);
 			lightingShader.setUniform("material.specular", glm::vec3(0.8f, 0.8f, 0.8f));
-			lightingShader.setUniform("material.shininess", 32);
+			lightingShader.setUniform("material.shininess", 32.0f);
 
 			texture[i].bind(0);
 			mesh[i].draw();
